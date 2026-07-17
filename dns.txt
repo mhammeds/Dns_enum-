@@ -1,0 +1,77 @@
+================================================================
+  dns_enum.sh — DNS Enumeration Tool
+  Usage: sudo ./dns_enum.sh <IP>
+================================================================
+
+المتطلبات:
+  sudo apt install dnsutils nmap
+
+الاستخدام:
+  chmod +x dns_enum.sh
+  sudo ./dns_enum.sh 10.129.14.128
+
+سؤال الدومين عند البداية:
+  - تعرف الدومين  →  اكتب: inlanefreight.htb
+  - ما تعرف       →  اضغط Enter  (يجرب PTR تلقائياً)
+
+----------------------------------------------------------------
+الأقسام:
+
+  /etc/hosts          يضيف IP + domain تلقائياً
+  NS Records          nameservers + IPs
+  MX Records          mail servers
+  TXT Records         SPF / DMARC / DKIM / Verify
+  A / AAAA            IPs المرتبطة بالدومين
+  SOA Record          إيميل المسؤول، serial، TTL
+  ANY Query           كل السجلات دفعة واحدة
+  CNAME               أسماء مستعارة
+  SRV Records         خدمات: LDAP, Kerberos, HTTP, SIP, SSH...
+  PTR Lookups         عكس كل IP مكتشف
+  Wildcard Detection  هل *.domain يرد بـ IP؟
+  AXFR on all NS      Zone Transfer على كل nameserver
+  DNSSEC / NSEC       هل zone walking ممكن؟
+  Common Subdomains   50 اسم شائع quick-wins
+  CHAOS Fingerprint   version.bind / hostname.bind
+  Zone Transfer       AXFR على الـ IP المعطى مباشرة
+
+----------------------------------------------------------------
+Brute-Force:
+
+  [?] Run subdomain brute-force?  →  y
+  Wordlist [Enter=default]:       →  Enter (يستخدم seclists)
+
+  Wordlists موصى بها:
+    سريعة:   /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+    متوسطة:  /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt
+    شاملة:   /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt
+    HTB:     /opt/useful/seclists/Discovery/DNS/subdomains-top1million-110000.txt
+
+  بعد الانتهاء يسألك 3 أسئلة:
+    [?] Re-enumerate each one? (DNS records + AXFR)
+    [?] Run mutation attack on each found subdomain?
+    [?] Run deep brute-force on each found subdomain?
+
+----------------------------------------------------------------
+Mutation Attack:
+
+  لما تلاقي ns.domain.htb يجرب في نفس المستوى:
+    ns1, ns2 ... ns20       أرقام سريعة
+    ns-word.domain.htb      word-label
+    word-ns.domain.htb      label-word
+
+  أسرع من deep brute-force لأنه ما يروح لمستوى أعمق.
+
+----------------------------------------------------------------
+ملفات الناتج:
+
+  dns_results/
+  ├── dns_inlanefreight_htb_TIMESTAMP.txt        التقرير الكامل
+  └── subdomains_inlanefreight_htb_TIMESTAMP.txt قائمة السب دومينز
+
+----------------------------------------------------------------
+ملاحظات OSCP:
+
+  - السكريبت مسموح (يستخدم dig/nmap فقط)
+  - ابدأ بـ nmap أولاً لتأكيد port 53
+  - احفظ التقرير — يتولّد تلقائياً
+================================================================
